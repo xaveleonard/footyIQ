@@ -1,4 +1,4 @@
-# ThirdUpV2
+# footyIQ
 
 Fantasy league analytics and visualization platform built with Python and Streamlit.
 
