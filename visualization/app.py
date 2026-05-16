@@ -18,7 +18,7 @@ from analysis.matchup_engine import MatchupEngine
 # ===========================================================
 
 st.set_page_config(
-    page_title="Fantasy League Analytics",
+    page_title="footyIQ",
     page_icon="📊",
     layout="wide"
 )
