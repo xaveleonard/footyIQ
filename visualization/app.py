@@ -124,14 +124,6 @@ DISPLAY_NAMES = {
     "r50": "R50",
     "spoils": "Spoils",
 
-    "ki": "KI",
-    "hb": "HB",
-    "ma": "MA",
-    "ho": "HO",
-    "tk": "TK",
-    "cl": "CL",
-    "sp": "SP",
-
     "round": "Round",
 
     "avg": "Avg",
@@ -174,45 +166,10 @@ def prettify_column_name(col):
     if lower_col in DISPLAY_NAMES:
         return DISPLAY_NAMES[lower_col]
 
-    pretty = str(col)
-
-    replacements = {
-
-        "score": "Score",
-        "kicks": "Kicks",
-        "handballs": "Handballs",
-        "marks": "Marks",
-        "hitouts": "Hitouts",
-        "tackles": "Tackles",
-        "cp": "CP",
-        "clearances": "Clearances",
-        "r50": "R50",
-        "spoils": "Spoils",
-
-        "ki": "KI",
-        "hb": "HB",
-        "ma": "MA",
-        "ho": "HO",
-        "tk": "TK",
-        "cl": "CL",
-        "sp": "SP",
-
-        "avg": "Avg",
-        "form": "Form",
-        "rank": "Rank",
-        "volatility": "Volatility",
-        "vol": "Vol"
-    }
-
-    for old, new in replacements.items():
-
-        pretty = pretty.replace(old, new)
-        pretty = pretty.replace(old.capitalize(), new)
-
-    return pretty
+    return str(col)
 
 # ==========================================================
-# HTML TABLE RENDER
+# TABLE RENDER
 # ==========================================================
 
 def render_table(styled_df):
@@ -242,9 +199,11 @@ def format_table(df):
     for col in df.columns:
 
         if "Volatility" in col:
+
             format_dict[col] = "±{:.1f}%"
 
         elif pd.api.types.is_numeric_dtype(df[col]):
+
             format_dict[col] = "{:.1f}"
 
     return (
@@ -274,11 +233,6 @@ def style_matchup_comparison(
                 f"{team_b} Volatility"
         }
     )
-
-    df.columns = [
-        prettify_column_name(col)
-        for col in df.columns
-    ]
 
     def colour_cells(row):
 
@@ -318,18 +272,24 @@ def style_matchup_comparison(
     for col in df.columns:
 
         if "Rank" in col:
+
             format_dict[col] = "{:.0f}"
 
         elif "Volatility" in col:
+
             format_dict[col] = "±{:.1f}%"
 
         elif pd.api.types.is_numeric_dtype(df[col]):
+
             format_dict[col] = "{:.1f}"
 
     return (
         df.style
         .hide(axis="index")
-        .apply(colour_cells, axis=1)
+        .apply(
+            colour_cells,
+            axis=1
+        )
         .format(format_dict)
     )
 
@@ -388,19 +348,30 @@ def style_round_comparison(
         for col in team_a_styled.columns:
 
             if col == "Round":
+
                 styles.append("")
                 continue
 
-            a_val = team_a_styled.loc[row_idx, col]
-            b_val = team_b_styled.loc[row_idx, col]
+            a_val = team_a_styled.loc[
+                row_idx,
+                col
+            ]
+
+            b_val = team_b_styled.loc[
+                row_idx,
+                col
+            ]
 
             if a_val > b_val:
+
                 styles.append(WIN_COLOUR)
 
             elif a_val < b_val:
+
                 styles.append(LOSS_COLOUR)
 
             else:
+
                 styles.append(DRAW_COLOUR)
 
         return styles
@@ -412,19 +383,30 @@ def style_round_comparison(
         for col in team_b_styled.columns:
 
             if col == "Round":
+
                 styles.append("")
                 continue
 
-            a_val = team_a_styled.loc[row_idx, col]
-            b_val = team_b_styled.loc[row_idx, col]
+            a_val = team_a_styled.loc[
+                row_idx,
+                col
+            ]
+
+            b_val = team_b_styled.loc[
+                row_idx,
+                col
+            ]
 
             if b_val > a_val:
+
                 styles.append(WIN_COLOUR)
 
             elif b_val < a_val:
+
                 styles.append(LOSS_COLOUR)
 
             else:
+
                 styles.append(DRAW_COLOUR)
 
         return styles
@@ -450,7 +432,7 @@ def style_round_comparison(
     return styled_a, styled_b
 
 # ==========================================================
-# LOAD DATA
+# LOAD ANALYTICS
 # ==========================================================
 
 @st.cache_data
@@ -524,7 +506,7 @@ def load_analytics():
     }
 
 # ==========================================================
-# LOAD ANALYTICS
+# LOAD DATA
 # ==========================================================
 
 data = load_analytics()
@@ -701,21 +683,10 @@ if page == "Matchup View":
         "### Head-to-Head Results"
     )
 
-    h2h_df = (
+    styled_h2h = (
         historical[
             "head_to_head_table"
         ]
-        .copy()
-    )
-
-    h2h_df.columns = [
-
-        prettify_column_name(col)
-        for col in h2h_df.columns
-    ]
-
-    styled_h2h = (
-        h2h_df
         .reset_index(drop=True)
         .style
         .hide(axis="index")
@@ -880,35 +851,13 @@ elif page == "Category Leaderboards":
         "Category Leaderboards"
     )
 
-    pretty_categories = [
-
-        prettify_column_name(c)
-        for c in leaderboards.keys()
-    ]
-
     selected_category = st.selectbox(
         "Select Category",
-        pretty_categories
+        list(leaderboards.keys())
     )
 
-    reverse_lookup = {
-
-        prettify_column_name(k): k
-        for k in leaderboards.keys()
-    }
-
-    leaderboard_key = reverse_lookup[
-        selected_category
-    ]
-
     leaderboard = leaderboards[
-        leaderboard_key
-    ]
-
-    leaderboard.columns = [
-
-        prettify_column_name(col)
-        for col in leaderboard.columns
+        selected_category
     ]
 
     styled_leaderboard = format_table(
@@ -925,16 +874,8 @@ elif page == "Power Rankings":
 
     st.title("Overall Power Rankings")
 
-    power_df = power_rankings.copy()
-
-    power_df.columns = [
-
-        prettify_column_name(col)
-        for col in power_df.columns
-    ]
-
     styled_power = format_table(
-        power_df.round(1)
+        power_rankings.round(1)
     )
 
     render_table(styled_power)
