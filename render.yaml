@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: footyiq-api
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: DATA_PATH
+        value: data/raw/2026/teams.parquet
