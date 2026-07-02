@@ -1,5 +1,7 @@
 import pandas as pd
 
+from analysis.constants import CATEGORY_COLS, CATEGORY_WEIGHTS
+
 
 # ===========================================================
 # MATCHUP ENGINE
@@ -9,24 +11,7 @@ class MatchupEngine:
 
     def __init__(self):
 
-        # ===================================================
-        # CATEGORY WEIGHTS
-        # ===================================================
-
-        self.category_weights = {
-
-            "score": 3,
-            "spoils": 2,
-
-            "kicks": 1,
-            "handballs": 1,
-            "marks": 1,
-            "hitouts": 1,
-            "tackles": 1,
-            "cp": 1,
-            "clearances": 1,
-            "r50": 1
-        }
+        self.category_weights = CATEGORY_WEIGHTS
 
     # =======================================================
     # HEAD TO HEAD MATCHUP
@@ -187,19 +172,7 @@ class MatchupEngine:
         # STAT COLUMNS
         # ===================================================
 
-        stat_columns = [
-
-            "score",
-            "kicks",
-            "handballs",
-            "marks",
-            "hitouts",
-            "tackles",
-            "cp",
-            "clearances",
-            "r50",
-            "spoils"
-        ]
+        stat_columns = CATEGORY_COLS
 
         # ===================================================
         # TEAM DATA
@@ -263,17 +236,7 @@ class MatchupEngine:
                 # CATEGORY WEIGHTING
                 # ===========================================
 
-                if stat == "spoils":
-
-                    weight = 2
-
-                elif stat == "score":
-
-                    weight = 3
-
-                else:
-
-                    weight = 1
+                weight = CATEGORY_WEIGHTS.get(stat, 1)
 
                 # ===========================================
                 # CATEGORY WINNER

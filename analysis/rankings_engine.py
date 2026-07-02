@@ -1,28 +1,6 @@
 import pandas as pd
 
-
-# ===========================================================
-# CATEGORY WEIGHTS
-# ===========================================================
-
-CATEGORY_WEIGHTS = {
-    "score": 3,
-    "spoils": 2,
-    "kicks": 1,
-    "handballs": 1,
-    "marks": 1,
-    "hitouts": 1,
-    "tackles": 1,
-    "cp": 1,
-    "clearances": 1,
-    "r50": 1
-}
-
-WEIGHT_SERIES = pd.Series(
-    CATEGORY_WEIGHTS
-)
-
-TOTAL_WEIGHT = WEIGHT_SERIES.sum()
+from analysis.constants import WEIGHT_SERIES, TOTAL_WEIGHT
 
 
 # ===========================================================

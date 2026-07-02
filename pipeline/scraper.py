@@ -12,14 +12,12 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+from pipeline.config import LEAGUE_ID, USERNAME, PASSWORD
+
 
 # =====================
 # CONFIGURATION
 # =====================
-
-LEAGUE_ID = 619526
-USERNAME = "YOUR_USERNAME"
-PASSWORD = "YOUR_PASSWORD"
 
 BASE_URL = "https://keeperfantasy.com"
 

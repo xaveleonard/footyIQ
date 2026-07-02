@@ -1,25 +1,7 @@
 import pandas as pd
 import numpy as np
 
-
-# ===========================================================
-# CONFIG
-# ===========================================================
-
-CATEGORY_COLS = [
-    "score",
-    "kicks",
-    "handballs",
-    "marks",
-    "hitouts",
-    "tackles",
-    "cp",
-    "clearances",
-    "r50",
-    "spoils"
-]
-
-RECENT_FORM_ROUNDS = 4
+from analysis.constants import CATEGORY_COLS, RECENT_FORM_ROUNDS
 
 
 # ===========================================================
