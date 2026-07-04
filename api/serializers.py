@@ -53,7 +53,7 @@ def build_team_detail(bundle: dict, team_name: str) -> dict | None:
     if team_name not in season["averages"].index:
         return None
 
-    power_rankings = bundle["power_rankings"]
+    power_rankings = bundle["windows"]["season"]["power_rankings"]
     power_row = power_rankings[power_rankings["Team"] == team_name].iloc[0]
 
     profile = bundle["profiles"][team_name]
@@ -84,8 +84,8 @@ def build_team_detail(bundle: dict, team_name: str) -> dict | None:
 # ===========================================================
 
 
-def build_power_rankings_response(bundle: dict) -> list[dict]:
-    df = bundle["power_rankings"].rename(columns={
+def build_power_rankings_response(bundle: dict, window: str = "season") -> list[dict]:
+    df = bundle["windows"][window]["power_rankings"].rename(columns={
         "Power Rank": "power_rank",
         "Team": "team_name",
         "Power Score": "power_score",
@@ -93,8 +93,10 @@ def build_power_rankings_response(bundle: dict) -> list[dict]:
     return df_records(df)
 
 
-def build_leaderboard_response(bundle: dict, category: str) -> list[dict] | None:
-    leaderboards = bundle["leaderboards"]
+def build_leaderboard_response(
+    bundle: dict, category: str, window: str = "season"
+) -> list[dict] | None:
+    leaderboards = bundle["windows"][window]["leaderboards"]
 
     if category not in leaderboards:
         return None
@@ -109,11 +111,29 @@ def build_leaderboard_response(bundle: dict, category: str) -> list[dict] | None
     return df_records(df)
 
 
-def build_all_leaderboards_response(bundle: dict) -> dict[str, list[dict]]:
+def build_all_leaderboards_response(bundle: dict, window: str = "season") -> dict[str, list[dict]]:
     return {
-        category: build_leaderboard_response(bundle, category)
-        for category in bundle["leaderboards"]
+        category: build_leaderboard_response(bundle, category, window)
+        for category in bundle["windows"][window]["leaderboards"]
     }
+
+
+# ===========================================================
+# LEAGUE RECORDS
+# ===========================================================
+
+
+def build_league_records_response(bundle: dict) -> list[dict]:
+    records = bundle["league_records"]
+
+    return [
+        _clean_record({
+            "category": category,
+            "value": record["value"],
+            "holders": [_clean_record(holder) for holder in record["holders"]],
+        })
+        for category, record in records.items()
+    ]
 
 
 # ===========================================================

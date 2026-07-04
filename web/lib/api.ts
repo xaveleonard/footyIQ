@@ -1,8 +1,10 @@
 import type {
+  CategoryRecord,
   HeadToHeadResponse,
   LeaderboardEntry,
   MatchupHistoryResponse,
   PowerRankingEntry,
+  RankingsWindow,
   TeamDetail,
 } from "./types";
 
@@ -44,16 +46,27 @@ export function getTeamDetail(teamName: string): Promise<TeamDetail> {
   return apiFetch<TeamDetail>(`/teams/${encodeURIComponent(teamName)}`);
 }
 
-export function getPowerRankings(): Promise<PowerRankingEntry[]> {
-  return apiFetch<PowerRankingEntry[]>("/rankings/power");
+export function getPowerRankings(window: RankingsWindow = "season"): Promise<PowerRankingEntry[]> {
+  return apiFetch<PowerRankingEntry[]>("/rankings/power", { window });
 }
 
-export function getLeaderboard(category: string): Promise<LeaderboardEntry[]> {
-  return apiFetch<LeaderboardEntry[]>(`/rankings/leaderboards/${encodeURIComponent(category)}`);
+export function getLeaderboard(
+  category: string,
+  window: RankingsWindow = "season"
+): Promise<LeaderboardEntry[]> {
+  return apiFetch<LeaderboardEntry[]>(`/rankings/leaderboards/${encodeURIComponent(category)}`, {
+    window,
+  });
 }
 
-export function getAllLeaderboards(): Promise<Record<string, LeaderboardEntry[]>> {
-  return apiFetch<Record<string, LeaderboardEntry[]>>("/rankings/leaderboards");
+export function getAllLeaderboards(
+  window: RankingsWindow = "season"
+): Promise<Record<string, LeaderboardEntry[]>> {
+  return apiFetch<Record<string, LeaderboardEntry[]>>("/rankings/leaderboards", { window });
+}
+
+export function getLeagueRecords(): Promise<CategoryRecord[]> {
+  return apiFetch<CategoryRecord[]>("/rankings/records");
 }
 
 export function getHeadToHead(teamA: string, teamB: string): Promise<HeadToHeadResponse> {

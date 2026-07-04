@@ -28,16 +28,27 @@ class AnalyticsEngine:
             self.data_path
         )
 
-        latest_round = self.df["round"].max()
+        self.recent_df = self.filter_last_n_rounds(
+            self.df,
+            RECENT_FORM_ROUNDS
+        )
+
+    # =======================================================
+    # FILTER TO LAST N ROUNDS
+    # =======================================================
+
+    def filter_last_n_rounds(self, df, n_rounds):
+
+        latest_round = df["round"].max()
 
         min_round = (
             latest_round -
-            RECENT_FORM_ROUNDS +
+            n_rounds +
             1
         )
 
-        self.recent_df = self.df[
-            self.df["round"] >= min_round
+        return df[
+            df["round"] >= min_round
         ].copy()
 
     # =======================================================
@@ -232,6 +243,31 @@ class AnalyticsEngine:
             }
 
         return profiles
+
+    # =======================================================
+    # LEAGUE RECORDS
+    # =======================================================
+
+    def compute_league_records(self, df):
+
+        records = {}
+
+        for category in CATEGORY_COLS:
+
+            max_value = df[category].max()
+
+            holders = (
+                df[df[category] == max_value][["team_name", "round"]]
+                .drop_duplicates()
+                .sort_values(["round", "team_name"])
+            )
+
+            records[category] = {
+                "value": max_value,
+                "holders": holders.to_dict("records"),
+            }
+
+        return records
 
     # =======================================================
     # BUILD ANALYTICS

@@ -3,8 +3,18 @@ from functools import lru_cache
 from analysis.analytics_engine import AnalyticsEngine
 from analysis.rankings_engine import RankingsEngine
 from analysis.matchup_engine import MatchupEngine
+from analysis.constants import RANKINGS_WINDOW_ROUNDS
 
 from api.config import get_settings
+
+
+def _build_window(rankings_engine, analytics):
+    return {
+        "power_rankings": rankings_engine.compute_power_rankings(
+            analytics["percentiles"], analytics["win_rates"], analytics["volatility"]
+        ),
+        "leaderboards": rankings_engine.build_category_leaderboards(analytics),
+    }
 
 
 def build_analytics_bundle(data_path: str) -> dict:
@@ -28,18 +38,24 @@ def build_analytics_bundle(data_path: str) -> dict:
 
     profiles = analytics_engine.identify_strengths_weaknesses(season["ranks"])
 
-    power_rankings = rankings_engine.compute_power_rankings(
-        season["percentiles"], season["win_rates"], season["volatility"]
+    last3_df = analytics_engine.filter_last_n_rounds(
+        analytics_engine.df, RANKINGS_WINDOW_ROUNDS
     )
+    last3_analytics = analytics_engine.build_analytics(last3_df)
 
-    leaderboards = rankings_engine.build_category_leaderboards(season)
+    windows = {
+        "season": _build_window(rankings_engine, season),
+        "last3": _build_window(rankings_engine, last3_analytics),
+    }
+
+    league_records = analytics_engine.compute_league_records(analytics_engine.df)
 
     return {
         "season": season,
         "recent_form_change": recent_form_change,
         "profiles": profiles,
-        "power_rankings": power_rankings,
-        "leaderboards": leaderboards,
+        "windows": windows,
+        "league_records": league_records,
         "matchup_engine": matchup_engine,
         "raw_df": analytics_engine.df,
     }

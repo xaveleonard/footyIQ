@@ -19,6 +19,9 @@ CATEGORY_COLS = [
 
 RECENT_FORM_ROUNDS = 4
 
+# window size for the "Last 3 Rounds" toggle on Power Rankings / Leaderboards
+RANKINGS_WINDOW_ROUNDS = 3
+
 # ===========================================================
 # CATEGORY WEIGHTS
 # ===========================================================

@@ -1,5 +1,6 @@
 import { TeamBarChart } from "@/components/charts/team-bar-chart";
 import { ParamSelect } from "@/components/param-select";
+import { ParamTabs } from "@/components/param-tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -12,17 +13,24 @@ import {
 import { getLeaderboard } from "@/lib/api";
 import { CATEGORIES } from "@/lib/categories";
 import { categoryLabel, formatNumber, formatPercent } from "@/lib/format";
+import type { RankingsWindow } from "@/lib/types";
+
+const WINDOW_OPTIONS = [
+  { value: "season", label: "Season" },
+  { value: "last3", label: "Last 3 Rounds" },
+];
 
 interface PageProps {
-  searchParams: Promise<{ category?: string }>;
+  searchParams: Promise<{ category?: string; window?: string }>;
 }
 
 export default async function LeaderboardsPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const requested = params.category ?? "score";
   const category = (CATEGORIES as readonly string[]).includes(requested) ? requested : "score";
+  const window: RankingsWindow = params.window === "last3" ? "last3" : "season";
 
-  const leaderboard = await getLeaderboard(category);
+  const leaderboard = await getLeaderboard(category, window);
 
   const chartData = leaderboard.map((entry) => ({
     name: entry.team_name,
@@ -36,11 +44,14 @@ export default async function LeaderboardsPage({ searchParams }: PageProps) {
         <p className="text-sm text-muted-foreground">Season averages ranked by category.</p>
       </div>
 
-      <ParamSelect
-        paramName="category"
-        value={category}
-        options={CATEGORIES.map((c) => ({ value: c, label: categoryLabel(c) }))}
-      />
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <ParamSelect
+          paramName="category"
+          value={category}
+          options={CATEGORIES.map((c) => ({ value: c, label: categoryLabel(c) }))}
+        />
+        <ParamTabs paramName="window" value={window} options={WINDOW_OPTIONS} />
+      </div>
 
       <Card>
         <CardHeader>
@@ -53,7 +64,9 @@ export default async function LeaderboardsPage({ searchParams }: PageProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>{categoryLabel(category)}</CardTitle>
+          <CardTitle>
+            {categoryLabel(category)} — {window === "last3" ? "Last 3 Rounds" : "Season"}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <Table>

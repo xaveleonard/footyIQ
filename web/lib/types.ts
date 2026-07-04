@@ -30,6 +30,19 @@ export interface LeaderboardEntry {
   volatility: number;
 }
 
+export type RankingsWindow = "season" | "last3";
+
+export interface RecordHolder {
+  team_name: string;
+  round: number;
+}
+
+export interface CategoryRecord {
+  category: string;
+  value: number;
+  holders: RecordHolder[];
+}
+
 export type ProjectedWinner = "team_a" | "team_b" | "tie";
 
 export interface CategoryComparison {

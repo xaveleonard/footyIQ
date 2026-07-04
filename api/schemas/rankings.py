@@ -13,3 +13,14 @@ class LeaderboardEntry(BaseModel):
     average: float
     win_rate: float
     volatility: float
+
+
+class RecordHolder(BaseModel):
+    team_name: str
+    round: int
+
+
+class CategoryRecord(BaseModel):
+    category: str
+    value: float
+    holders: list[RecordHolder]

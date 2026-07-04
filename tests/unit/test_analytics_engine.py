@@ -215,3 +215,61 @@ def test_build_analytics_returns_expected_keys(engine, teams_df):
 
     assert set(result.keys()) == {"averages", "ranks", "percentiles", "win_rates", "volatility"}
     assert result["averages"].loc["Team A", "score"] == 105.0
+
+
+# ===========================================================
+# FILTER LAST N ROUNDS (standalone, reused by load_data and the
+# Power Rankings / Leaderboards "Last 3 Rounds" window)
+# ===========================================================
+
+def test_filter_last_n_rounds_excludes_old_rounds(engine):
+    rows = [
+        {"round": round_number, "team_name": "Team A", "score": 100}
+        for round_number in range(1, 6)
+    ]
+    df = pd.DataFrame(rows)
+
+    filtered = engine.filter_last_n_rounds(df, 3)
+
+    # 5 - 3 + 1 = 3, so rounds 3, 4, 5 should remain
+    assert sorted(filtered["round"].unique()) == [3, 4, 5]
+
+
+def test_filter_last_n_rounds_shorter_than_window_keeps_everything(engine):
+    df = pd.DataFrame([
+        {"round": 1, "team_name": "Team A", "score": 100},
+        {"round": 2, "team_name": "Team A", "score": 110},
+    ])
+
+    filtered = engine.filter_last_n_rounds(df, 5)
+
+    assert sorted(filtered["round"].unique()) == [1, 2]
+
+
+# ===========================================================
+# LEAGUE RECORDS (single holder + tie-across-everyone cases)
+# ===========================================================
+
+def test_compute_league_records_single_holder(engine, teams_df):
+    records = engine.compute_league_records(teams_df)
+
+    # score: Team A's round-2 value of 110 is the outright max
+    assert records["score"]["value"] == 110
+    assert records["score"]["holders"] == [{"team_name": "Team A", "round": 2}]
+
+    # kicks: Team D's round-2 value of 225 is the outright max
+    assert records["kicks"]["value"] == 225
+    assert records["kicks"]["holders"] == [{"team_name": "Team D", "round": 2}]
+
+
+def test_compute_league_records_shows_every_tied_holder(engine, teams_df):
+    records = engine.compute_league_records(teams_df)
+
+    # "handballs" is a constant 50 for every team/round in the fixture,
+    # so all 4 teams x 2 rounds = 8 rows tie for the max
+    handballs_record = records["handballs"]
+
+    assert handballs_record["value"] == 50
+    assert len(handballs_record["holders"]) == 8
+    assert {"team_name": "Team A", "round": 1} in handballs_record["holders"]
+    assert {"team_name": "Team D", "round": 2} in handballs_record["holders"]

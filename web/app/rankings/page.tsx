@@ -1,4 +1,5 @@
 import { TeamBarChart } from "@/components/charts/team-bar-chart";
+import { ParamTabs } from "@/components/param-tabs";
 import { PowerScoreMethodology } from "@/components/power-score-methodology";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,9 +13,22 @@ import {
 } from "@/components/ui/table";
 import { getPowerRankings } from "@/lib/api";
 import { formatNumber } from "@/lib/format";
+import type { RankingsWindow } from "@/lib/types";
 
-export default async function RankingsPage() {
-  const rankings = await getPowerRankings();
+const WINDOW_OPTIONS = [
+  { value: "season", label: "Season" },
+  { value: "last3", label: "Last 3 Rounds" },
+];
+
+interface PageProps {
+  searchParams: Promise<{ window?: string }>;
+}
+
+export default async function RankingsPage({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const window: RankingsWindow = params.window === "last3" ? "last3" : "season";
+
+  const rankings = await getPowerRankings(window);
 
   const chartData = rankings.map((entry) => ({
     name: entry.team_name,
@@ -32,6 +46,8 @@ export default async function RankingsPage() {
 
       <PowerScoreMethodology />
 
+      <ParamTabs paramName="window" value={window} options={WINDOW_OPTIONS} />
+
       <Card>
         <CardHeader>
           <CardTitle>Power Score by Team</CardTitle>
@@ -43,7 +59,7 @@ export default async function RankingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Season Standings</CardTitle>
+          <CardTitle>{window === "last3" ? "Last 3 Rounds" : "Season"} Standings</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
