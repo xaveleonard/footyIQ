@@ -1,3 +1,6 @@
+import type { CSSProperties } from "react";
+
+import { DivergingBarChart } from "@/components/charts/diverging-bar-chart";
 import { ParamSelect } from "@/components/param-select";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,20 +15,25 @@ import {
 import { ApiError, getHeadToHead, getMatchupHistory, getTeams } from "@/lib/api";
 import { categoryLabel, formatNumber, formatPercent } from "@/lib/format";
 import type { HeadToHeadResponse, MatchupHistoryResponse, RoundOutcome } from "@/lib/types";
-import { cn } from "@/lib/utils";
 
 interface PageProps {
   searchParams: Promise<{ team_a?: string; team_b?: string }>;
 }
 
-function resultBadgeClass(result: RoundOutcome) {
+function resultBadgeStyle(result: RoundOutcome): CSSProperties {
   switch (result) {
     case "W":
-      return "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300";
+      return {
+        backgroundColor: "color-mix(in oklch, var(--status-good) 15%, transparent)",
+        color: "var(--status-good)",
+      };
     case "L":
-      return "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300";
+      return {
+        backgroundColor: "color-mix(in oklch, var(--status-critical) 15%, transparent)",
+        color: "var(--status-critical)",
+      };
     default:
-      return "bg-muted text-muted-foreground";
+      return { backgroundColor: "var(--muted)", color: "var(--muted-foreground)" };
   }
 }
 
@@ -54,6 +62,16 @@ export default async function MatchupsPage({ searchParams }: PageProps) {
   } catch (err) {
     error = err instanceof ApiError ? err.message : "Failed to load matchup data.";
   }
+
+  const categoryChartData = headToHead?.categories.map((row) => ({
+    label: categoryLabel(row.category),
+    value: row.team_b_rank - row.team_a_rank,
+  }));
+
+  const roundChartData = history?.rounds.map((round) => ({
+    label: String(round.round),
+    value: round.team_a_score - round.team_b_score,
+  }));
 
   return (
     <div className="flex flex-col gap-6">
@@ -98,6 +116,20 @@ export default async function MatchupsPage({ searchParams }: PageProps) {
           <p className="text-xs text-muted-foreground">
             Score = 3 pts &middot; Spoils = 2 pts &middot; all other categories = 1 pt
           </p>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Category Advantage</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <DivergingBarChart
+                data={categoryChartData ?? []}
+                positiveLabel={teamA}
+                negativeLabel={teamB}
+                orientation="horizontal"
+              />
+            </CardContent>
+          </Card>
 
           <Card>
             <CardHeader>
@@ -167,6 +199,13 @@ export default async function MatchupsPage({ searchParams }: PageProps) {
                 </div>
               </div>
 
+              <DivergingBarChart
+                data={roundChartData ?? []}
+                positiveLabel={teamA}
+                negativeLabel={teamB}
+                orientation="vertical"
+              />
+
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -181,10 +220,8 @@ export default async function MatchupsPage({ searchParams }: PageProps) {
                       <TableCell>{round.round}</TableCell>
                       <TableCell className="text-right">
                         <span
-                          className={cn(
-                            "rounded px-1.5 py-0.5 text-xs font-semibold",
-                            resultBadgeClass(round.team_a_result)
-                          )}
+                          className="rounded px-1.5 py-0.5 text-xs font-semibold"
+                          style={resultBadgeStyle(round.team_a_result)}
                         >
                           {round.team_a_result}
                         </span>{" "}
@@ -193,10 +230,8 @@ export default async function MatchupsPage({ searchParams }: PageProps) {
                       <TableCell className="text-right">
                         <span className="tabular-nums">{round.team_b_score}</span>{" "}
                         <span
-                          className={cn(
-                            "rounded px-1.5 py-0.5 text-xs font-semibold",
-                            resultBadgeClass(round.team_b_result)
-                          )}
+                          className="rounded px-1.5 py-0.5 text-xs font-semibold"
+                          style={resultBadgeStyle(round.team_b_result)}
                         >
                           {round.team_b_result}
                         </span>

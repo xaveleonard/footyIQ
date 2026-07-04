@@ -1,3 +1,4 @@
+import { TeamBarChart } from "@/components/charts/team-bar-chart";
 import { ParamSelect } from "@/components/param-select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -23,6 +24,11 @@ export default async function LeaderboardsPage({ searchParams }: PageProps) {
 
   const leaderboard = await getLeaderboard(category);
 
+  const chartData = leaderboard.map((entry) => ({
+    name: entry.team_name,
+    value: entry.average,
+  }));
+
   return (
     <div className="flex flex-col gap-6">
       <div>
@@ -35,6 +41,15 @@ export default async function LeaderboardsPage({ searchParams }: PageProps) {
         value={category}
         options={CATEGORIES.map((c) => ({ value: c, label: categoryLabel(c) }))}
       />
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{categoryLabel(category)} Average by Team</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <TeamBarChart data={chartData} valueLabel="Average" />
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

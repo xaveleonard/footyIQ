@@ -1,3 +1,4 @@
+import { StatusBarChart } from "@/components/charts/status-bar-chart";
 import { ParamSelect } from "@/components/param-select";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,6 +23,19 @@ export default async function TeamAnalysisPage({ searchParams }: PageProps) {
   const team = params.team && teams.includes(params.team) ? params.team : teams[0];
 
   const detail = await getTeamDetail(team);
+
+  const teamCount = teams.length;
+  const chartData = detail.categories.map((stat) => ({
+    category: stat.category,
+    label: categoryLabel(stat.category),
+    percentile:
+      teamCount > 1 ? (100 * (teamCount - stat.rank)) / (teamCount - 1) : 100,
+    status: detail.strengths.includes(stat.category)
+      ? ("good" as const)
+      : detail.weaknesses.includes(stat.category)
+        ? ("serious" as const)
+        : ("neutral" as const),
+  }));
 
   return (
     <div className="flex flex-col gap-6">
@@ -87,6 +101,15 @@ export default async function TeamAnalysisPage({ searchParams }: PageProps) {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Category Percentile</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <StatusBarChart data={chartData} />
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

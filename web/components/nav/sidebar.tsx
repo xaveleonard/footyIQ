@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
 
 import { NAV_ITEMS } from "./nav-items";
@@ -12,8 +13,9 @@ export function Sidebar() {
 
   return (
     <aside className="hidden md:flex md:w-56 md:shrink-0 md:flex-col md:border-r md:bg-muted/30">
-      <div className="px-6 py-5">
+      <div className="flex items-center justify-between px-6 py-5">
         <span className="text-lg font-semibold tracking-tight">footyIQ</span>
+        <ThemeToggle />
       </div>
       <nav className="flex flex-1 flex-col gap-1 px-3">
         {NAV_ITEMS.map((item) => {

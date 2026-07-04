@@ -1,3 +1,4 @@
+import { TeamBarChart } from "@/components/charts/team-bar-chart";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -14,6 +15,11 @@ import { formatNumber } from "@/lib/format";
 export default async function RankingsPage() {
   const rankings = await getPowerRankings();
 
+  const chartData = rankings.map((entry) => ({
+    name: entry.team_name,
+    value: entry.power_score,
+  }));
+
   return (
     <div className="flex flex-col gap-6">
       <div>
@@ -22,6 +28,15 @@ export default async function RankingsPage() {
           Blended from category win rate, percentile strength, and consistency.
         </p>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Power Score by Team</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <TeamBarChart data={chartData} valueLabel="Power Score" />
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
