@@ -14,7 +14,12 @@ import {
 } from "@/components/ui/table";
 import { ApiError, getHeadToHead, getMatchupHistory, getTeams } from "@/lib/api";
 import { categoryLabel, formatNumber, formatPercent } from "@/lib/format";
-import type { HeadToHeadResponse, MatchupHistoryResponse, RoundOutcome } from "@/lib/types";
+import type {
+  HeadToHeadResponse,
+  MatchupHistoryResponse,
+  ProjectedWinner,
+  RoundOutcome,
+} from "@/lib/types";
 
 interface PageProps {
   searchParams: Promise<{ team_a?: string; team_b?: string }>;
@@ -31,6 +36,25 @@ function resultBadgeStyle(result: RoundOutcome): CSSProperties {
       return {
         backgroundColor: "color-mix(in oklch, var(--status-critical) 15%, transparent)",
         color: "var(--status-critical)",
+      };
+    default:
+      return { backgroundColor: "var(--muted)", color: "var(--muted-foreground)" };
+  }
+}
+
+// Matches the blue (Team A) / red (Team B) hues used by the Category
+// Advantage diverging bar chart above this table, so the two stay consistent.
+function projectedWinnerBadgeStyle(winner: ProjectedWinner): CSSProperties {
+  switch (winner) {
+    case "team_a":
+      return {
+        backgroundColor: "color-mix(in oklch, var(--diverging-a) 15%, transparent)",
+        color: "var(--diverging-a)",
+      };
+    case "team_b":
+      return {
+        backgroundColor: "color-mix(in oklch, var(--diverging-b) 15%, transparent)",
+        color: "var(--diverging-b)",
       };
     default:
       return { backgroundColor: "var(--muted)", color: "var(--muted-foreground)" };
@@ -160,7 +184,10 @@ export default async function MatchupsPage({ searchParams }: PageProps) {
                         <span className="text-muted-foreground">(#{row.team_b_rank})</span>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Badge variant={row.projected_winner === "tie" ? "outline" : "default"}>
+                        <Badge
+                          variant="outline"
+                          style={projectedWinnerBadgeStyle(row.projected_winner)}
+                        >
                           {row.projected_winner === "tie"
                             ? "Tie"
                             : row.projected_winner === "team_a"
