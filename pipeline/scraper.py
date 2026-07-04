@@ -270,11 +270,18 @@ def scrape_matchup(driver, round_number, matchup_number):
 # SAVE (INCREMENTAL)
 # =====================
 
-def save(team_dfs, player_dfs):
+def save(team_dfs, player_dfs, target_rounds=None):
     """
-    Appends new data to existing parquet files.
+    Saves newly scraped data into the parquet files.
 
-    Prevents duplicates and ensures idempotent runs.
+    If `target_rounds` is given, any existing rows for those rounds are
+    dropped before the new data is written in - this makes re-scraping a
+    round (to fix bad data, or backfill one explicitly) replace it cleanly
+    instead of piling up alongside the old rows, which plain
+    concat + drop_duplicates can't do since it only removes exact-match
+    duplicate rows. For a normal incremental run, `target_rounds` is just
+    the newly scraped rounds, which can't already be in `existing`, so
+    this is a no-op filter there.
     """
     team_path = DATA_DIR / "teams.parquet"
     player_path = DATA_DIR / "players.parquet"
@@ -284,6 +291,8 @@ def save(team_dfs, player_dfs):
 
         if team_path.exists():
             existing = pd.read_parquet(team_path)
+            if target_rounds is not None:
+                existing = existing[~existing["round"].isin(target_rounds)]
             combined = pd.concat([existing, new_teams]).drop_duplicates()
         else:
             combined = new_teams
@@ -295,31 +304,42 @@ def save(team_dfs, player_dfs):
 
         if player_path.exists():
             existing = pd.read_parquet(player_path)
+            if target_rounds is not None:
+                existing = existing[~existing["round"].isin(target_rounds)]
             combined = pd.concat([existing, new_players]).drop_duplicates()
         else:
             combined = new_players
 
         combined.to_parquet(player_path, index=False)
 
-    logging.info("Saved incremental data successfully")
+    logging.info("Saved data successfully")
 
 
 # =====================
 # MAIN PIPELINE
 # =====================
 
-def run():
+def run(rounds=None):
     """
-    Main execution loop:
-    - logs in
-    - skips already scraped rounds
-    - scrapes new rounds only
-    - stops automatically at future rounds
+    Main execution loop.
+
+    - rounds=None (default): incremental mode. Skips rounds already in the
+      parquet files, scrapes forward, and stops automatically at the first
+      round that hasn't been played yet.
+    - rounds=[14, 15, 16]: explicit mode. Scrapes exactly those rounds,
+      regardless of what's already saved, replacing any existing data for
+      them. Useful for backfilling specific rounds or re-scraping one that
+      had bad/incomplete data. If one of the requested rounds turns out to
+      not be played yet, it's skipped (logged) rather than aborting the
+      rest of the batch.
     """
     DATA_DIR.mkdir(parents=True, exist_ok=True)
 
     existing_rounds = get_existing_rounds()
     logging.info(f"Existing rounds: {sorted(existing_rounds)}")
+
+    explicit_mode = rounds is not None
+    candidate_rounds = rounds if explicit_mode else range(1, MAX_ROUNDS + 1)
 
     driver = create_driver()
 
@@ -328,33 +348,49 @@ def run():
 
         all_teams = []
         all_players = []
+        scraped_rounds = []
 
-        for rnd in range(1, MAX_ROUNDS + 1):
+        for rnd in candidate_rounds:
 
-            # skip rounds already scraped
-            if rnd in existing_rounds:
+            # in incremental mode, skip rounds already scraped;
+            # in explicit mode, always (re-)attempt the requested rounds
+            if not explicit_mode and rnd in existing_rounds:
                 logging.info(f"Skipping round {rnd} (already scraped)")
                 continue
 
             logging.info(f"=== ROUND {rnd} ===")
+
+            round_teams = []
+            round_players = []
+            round_unplayed = False
 
             for m in range(1, MATCHUPS_PER_ROUND + 1):
 
                 try:
                     team_df, player_df = scrape_matchup(driver, rnd, m)
 
-                    # stop when future round reached
                     if team_df is None:
-                        logging.info(f"Stopping at round {rnd} (not started)")
-                        return save(all_teams, all_players)
+                        round_unplayed = True
+                        break
 
-                    all_teams.append(team_df)
-                    all_players.append(player_df)
+                    round_teams.append(team_df)
+                    round_players.append(player_df)
 
                 except Exception as e:
                     logging.warning(f"Failed matchup r{rnd} m{m}: {e}")
 
-        save(all_teams, all_players)
+            if round_unplayed:
+                logging.info(f"Round {rnd} not started - skipping")
+                if not explicit_mode:
+                    # incremental mode stops entirely at the first unplayed round
+                    break
+                continue
+
+            all_teams.extend(round_teams)
+            all_players.extend(round_players)
+            scraped_rounds.append(rnd)
+
+        save(all_teams, all_players, target_rounds=scraped_rounds)
 
     finally:
         driver.quit()
@@ -365,4 +401,21 @@ def run():
 # =====================
 
 if __name__ == "__main__":
-    run()
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Scrape footyIQ round data.")
+    parser.add_argument(
+        "--rounds",
+        type=int,
+        nargs="+",
+        default=None,
+        metavar="N",
+        help=(
+            "Specific round number(s) to scrape, e.g. --rounds 14 15 16. "
+            "Replaces any existing data for these rounds. If omitted, scrapes "
+            "incrementally from the last saved round until the first unplayed round."
+        ),
+    )
+    args = parser.parse_args()
+
+    run(rounds=args.rounds)

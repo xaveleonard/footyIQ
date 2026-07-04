@@ -70,4 +70,12 @@ CORS on the API is controlled by the `ALLOWED_ORIGINS` env var (comma-separated)
 python -m pipeline.scraper
 ```
 
-Scrapes new rounds incrementally and appends to `data/raw/2026/`. Commit and push the updated parquet files, then redeploy the API on Render to pick up the new data.
+Scrapes new rounds incrementally, stopping automatically at the first round that hasn't been played yet. Commit and push the updated parquet files, then redeploy the API on Render to pick up the new data.
+
+To backfill or re-scrape specific rounds instead (e.g. after a round finishes but before the next one does, or to fix a round that scraped with bad data), pass `--rounds`:
+
+```bash
+python -m pipeline.scraper --rounds 14 15 16
+```
+
+This replaces any existing data for those exact rounds rather than appending alongside it.
