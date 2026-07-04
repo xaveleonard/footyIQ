@@ -1,4 +1,5 @@
 import { TeamBarChart } from "@/components/charts/team-bar-chart";
+import { PowerScoreMethodology } from "@/components/power-score-methodology";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -28,6 +29,8 @@ export default async function RankingsPage() {
           Blended from category win rate, percentile strength, and consistency.
         </p>
       </div>
+
+      <PowerScoreMethodology />
 
       <Card>
         <CardHeader>
