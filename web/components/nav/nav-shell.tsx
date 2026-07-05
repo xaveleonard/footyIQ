@@ -9,7 +9,7 @@ export function NavShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen">
       <Sidebar />
-      <div className="flex flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between border-b px-4 py-3 md:hidden">
           <span className="text-base font-semibold tracking-tight">That Was Out of Bounds</span>
           <ThemeToggle />
