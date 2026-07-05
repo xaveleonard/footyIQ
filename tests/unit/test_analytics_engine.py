@@ -101,6 +101,33 @@ def test_compute_volatility(engine, teams_df):
         assert volatility.loc[team, "handballs"] == 0.0
 
 
+def test_compute_volatility_is_nan_when_mean_is_zero(engine):
+    # a team with a genuine 0 mean (e.g. zero hitouts every game) makes the
+    # coefficient of variation 0/0 - mathematically undefined, not 0% or any
+    # other real number. The API layer is responsible for turning this NaN
+    # into a null in the response rather than crashing (see api/schemas).
+    rest = 50
+    df = pd.DataFrame([
+        {"team_name": "Team A", "hitouts": 0, "score": rest, "kicks": rest,
+         "handballs": rest, "marks": rest, "tackles": rest, "cp": rest,
+         "clearances": rest, "r50": rest, "spoils": rest},
+        {"team_name": "Team A", "hitouts": 0, "score": rest, "kicks": rest,
+         "handballs": rest, "marks": rest, "tackles": rest, "cp": rest,
+         "clearances": rest, "r50": rest, "spoils": rest},
+        {"team_name": "Team B", "hitouts": 10, "score": rest, "kicks": rest,
+         "handballs": rest, "marks": rest, "tackles": rest, "cp": rest,
+         "clearances": rest, "r50": rest, "spoils": rest},
+        {"team_name": "Team B", "hitouts": 12, "score": rest, "kicks": rest,
+         "handballs": rest, "marks": rest, "tackles": rest, "cp": rest,
+         "clearances": rest, "r50": rest, "spoils": rest},
+    ])
+
+    volatility = engine.compute_volatility(df)
+
+    assert pd.isna(volatility.loc["Team A", "hitouts"])
+    assert not pd.isna(volatility.loc["Team B", "hitouts"])
+
+
 # ===========================================================
 # CATEGORY WIN RATES
 # ===========================================================

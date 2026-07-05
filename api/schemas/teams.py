@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel
 
 
@@ -6,8 +8,10 @@ class CategoryStat(BaseModel):
     average: float
     rank: int
     win_rate: float
-    volatility: float
-    form_change: float
+    # None when the mean for this category is 0 (coefficient of variation /
+    # % change from a 0 baseline is mathematically undefined, not a real number)
+    volatility: Optional[float]
+    form_change: Optional[float]
 
 
 class TeamDetail(BaseModel):

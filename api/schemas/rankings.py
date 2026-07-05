@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel
 
 
@@ -12,7 +14,10 @@ class LeaderboardEntry(BaseModel):
     team_name: str
     average: float
     win_rate: float
-    volatility: float
+    # None when a team's mean for this category is 0 (e.g. zero hitouts across
+    # every game in a small window) - the coefficient of variation is
+    # mathematically undefined (0/0), not a real percentage.
+    volatility: Optional[float]
 
 
 class RecordHolder(BaseModel):

@@ -3,8 +3,10 @@ export interface CategoryStat {
   average: number;
   rank: number;
   win_rate: number;
-  volatility: number;
-  form_change: number;
+  // null when the category mean is 0 - coefficient of variation / % change
+  // from a 0 baseline is mathematically undefined, not a real number
+  volatility: number | null;
+  form_change: number | null;
 }
 
 export interface TeamDetail {
@@ -27,7 +29,7 @@ export interface LeaderboardEntry {
   team_name: string;
   average: number;
   win_rate: number;
-  volatility: number;
+  volatility: number | null;
 }
 
 export type RankingsWindow = "season" | "last3";
@@ -49,12 +51,12 @@ export interface CategoryComparison {
   category: string;
   team_a_avg: number;
   team_a_rank: number;
-  team_a_form: number;
-  team_a_volatility: number;
+  team_a_form: number | null;
+  team_a_volatility: number | null;
   team_b_avg: number;
   team_b_rank: number;
-  team_b_form: number;
-  team_b_volatility: number;
+  team_b_form: number | null;
+  team_b_volatility: number | null;
   projected_winner: ProjectedWinner;
 }
 

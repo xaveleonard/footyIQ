@@ -157,3 +157,73 @@ def test_league_records_shows_every_tied_holder(client):
 
     assert handballs_record["value"] == 50
     assert len(handballs_record["holders"]) == 8
+
+
+# ===========================================================
+# ZERO-MEAN VOLATILITY (regression: a team averaging 0 in a
+# category - e.g. zero hitouts across a small round window -
+# makes the coefficient of variation 0/0, which previously
+# reached the API as a bare NaN and crashed with a
+# ResponseValidationError because the schema required a float)
+# ===========================================================
+
+
+@pytest.fixture
+def zero_mean_client(tmp_path):
+    import pandas as pd
+    from fastapi.testclient import TestClient
+
+    from api.dependencies import build_analytics_bundle, get_analytics_bundle
+    from api.main import app
+
+    def row(round_number, matchup, team_name, hitouts):
+        rest = 50
+        return {
+            "round": round_number, "matchup": matchup, "team_id": hash(team_name) % 1000,
+            "team_name": team_name, "score": rest, "kicks": rest, "handballs": rest,
+            "marks": rest, "hitouts": hitouts, "tackles": rest, "cp": rest,
+            "clearances": rest, "r50": rest, "spoils": rest,
+        }
+
+    rows = [
+        row(1, 1, "Team P", 0), row(1, 1, "Team Q", 20),
+        row(1, 2, "Team R", 15), row(1, 2, "Team S", 25),
+        row(2, 1, "Team P", 0), row(2, 1, "Team Q", 22),
+        row(2, 2, "Team R", 18), row(2, 2, "Team S", 19),
+    ]
+
+    path = tmp_path / "teams.parquet"
+    pd.DataFrame(rows).to_parquet(path, index=False)
+
+    bundle = build_analytics_bundle(str(path))
+    app.dependency_overrides[get_analytics_bundle] = lambda: bundle
+
+    with TestClient(app) as test_client:
+        yield test_client
+
+    app.dependency_overrides.clear()
+
+
+def test_leaderboard_handles_zero_mean_volatility(zero_mean_client):
+    response = zero_mean_client.get("/rankings/leaderboards/hitouts")
+
+    assert response.status_code == 200
+    body = response.json()
+
+    team_p = next(e for e in body if e["team_name"] == "Team P")
+    assert team_p["average"] == 0.0
+    assert team_p["volatility"] is None
+
+    team_q = next(e for e in body if e["team_name"] == "Team Q")
+    assert team_q["volatility"] is not None
+
+
+def test_team_detail_handles_zero_mean_volatility(zero_mean_client):
+    response = zero_mean_client.get("/teams/Team P")
+
+    assert response.status_code == 200
+    body = response.json()
+
+    hitouts_stat = next(c for c in body["categories"] if c["category"] == "hitouts")
+    assert hitouts_stat["average"] == 0.0
+    assert hitouts_stat["volatility"] is None

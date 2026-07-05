@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table";
 import { getLeaderboard } from "@/lib/api";
 import { CATEGORIES } from "@/lib/categories";
-import { categoryLabel, formatNumber, formatPercent } from "@/lib/format";
+import { categoryLabel, formatNumber, formatPercent, formatVolatility } from "@/lib/format";
 import type { RankingsWindow } from "@/lib/types";
 
 const WINDOW_OPTIONS = [
@@ -91,7 +91,7 @@ export default async function LeaderboardsPage({ searchParams }: PageProps) {
                     {formatPercent(entry.win_rate)}
                   </TableCell>
                   <TableCell className="text-right tabular-nums">
-                    ±{formatPercent(entry.volatility)}
+                    {formatVolatility(entry.volatility)}
                   </TableCell>
                 </TableRow>
               ))}

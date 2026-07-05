@@ -11,7 +11,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { getTeamDetail, getTeams } from "@/lib/api";
-import { categoryLabel, formatNumber, formatPercent, formatSigned } from "@/lib/format";
+import {
+  categoryLabel,
+  formatNumber,
+  formatPercent,
+  formatSignedPercent,
+  formatVolatility,
+} from "@/lib/format";
 
 interface PageProps {
   searchParams: Promise<{ team?: string }>;
@@ -136,13 +142,13 @@ export default async function TeamAnalysisPage({ searchParams }: PageProps) {
                     {formatNumber(stat.average)}
                   </TableCell>
                   <TableCell className="text-right tabular-nums">
-                    {formatSigned(stat.form_change)}%
+                    {formatSignedPercent(stat.form_change)}
                   </TableCell>
                   <TableCell className="text-right tabular-nums">
                     {formatPercent(stat.win_rate)}
                   </TableCell>
                   <TableCell className="text-right tabular-nums">
-                    ±{formatPercent(stat.volatility)}
+                    {formatVolatility(stat.volatility)}
                   </TableCell>
                 </TableRow>
               ))}

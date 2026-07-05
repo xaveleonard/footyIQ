@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, Optional
 
 from pydantic import BaseModel
 
@@ -7,12 +7,14 @@ class CategoryComparison(BaseModel):
     category: str
     team_a_avg: float
     team_a_rank: int
-    team_a_form: float
-    team_a_volatility: float
+    # None when a team's category mean is 0 - the underlying % calculations
+    # (coefficient of variation, % change from a 0 baseline) are undefined
+    team_a_form: Optional[float]
+    team_a_volatility: Optional[float]
     team_b_avg: float
     team_b_rank: int
-    team_b_form: float
-    team_b_volatility: float
+    team_b_form: Optional[float]
+    team_b_volatility: Optional[float]
     projected_winner: Literal["team_a", "team_b", "tie"]
 
 
