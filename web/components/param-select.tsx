@@ -45,7 +45,11 @@ export function ParamSelect({
   return (
     <Select value={value} onValueChange={handleChange}>
       <SelectTrigger className={className ?? "w-full sm:w-64"}>
-        <SelectValue placeholder={placeholder ?? "Select..."} />
+        <SelectValue placeholder={placeholder ?? "Select..."}>
+          {(val: string | null) =>
+            options.find((option) => option.value === val)?.label ?? placeholder ?? "Select..."
+          }
+        </SelectValue>
       </SelectTrigger>
       <SelectContent>
         {options.map((option) => (

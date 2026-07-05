@@ -1,6 +1,8 @@
+import { Swords } from "lucide-react";
 import type { CSSProperties } from "react";
 
 import { DivergingBarChart } from "@/components/charts/diverging-bar-chart";
+import { PageHeader } from "@/components/page-header";
 import { ParamSelect } from "@/components/param-select";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -99,12 +101,11 @@ export default async function MatchupsPage({ searchParams }: PageProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Head-to-Head Matchup</h1>
-        <p className="text-sm text-muted-foreground">
-          Projected category comparison and simulated round history.
-        </p>
-      </div>
+      <PageHeader
+        icon={Swords}
+        title="Head-to-Head Matchup"
+        description="Projected category comparison and simulated round history."
+      />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <ParamSelect paramName="team_a" value={teamA} options={teamOptions} placeholder="Team A" />

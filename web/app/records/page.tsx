@@ -1,3 +1,6 @@
+import { Medal } from "lucide-react";
+
+import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -16,12 +19,11 @@ export default async function RecordsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">League Records</h1>
-        <p className="text-sm text-muted-foreground">
-          The single best round ever recorded in each category, and who did it.
-        </p>
-      </div>
+      <PageHeader
+        icon={Medal}
+        title="League Records"
+        description="The single best round ever recorded in each category, and who did it."
+      />
 
       <Card>
         <CardHeader>

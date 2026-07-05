@@ -1,4 +1,7 @@
+import { BarChart3 } from "lucide-react";
+
 import { StatusBarChart } from "@/components/charts/status-bar-chart";
+import { PageHeader } from "@/components/page-header";
 import { ParamSelect } from "@/components/param-select";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -45,10 +48,11 @@ export default async function TeamAnalysisPage({ searchParams }: PageProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Team Analysis</h1>
-        <p className="text-sm text-muted-foreground">Deep dive on a single team&apos;s season.</p>
-      </div>
+      <PageHeader
+        icon={BarChart3}
+        title="Team Analysis"
+        description="Deep dive on a single team's season."
+      />
 
       <ParamSelect
         paramName="team"

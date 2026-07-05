@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "footyIQ",
+  title: "That Was Out of Bounds",
   description: "Fantasy league analytics and matchup dashboard",
 };
 

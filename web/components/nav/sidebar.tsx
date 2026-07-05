@@ -13,8 +13,10 @@ export function Sidebar() {
 
   return (
     <aside className="hidden md:flex md:w-56 md:shrink-0 md:flex-col md:border-r md:bg-muted/30">
-      <div className="flex items-center justify-between px-6 py-5">
-        <span className="text-lg font-semibold tracking-tight">footyIQ</span>
+      <div className="flex items-center justify-between gap-2 px-6 py-5">
+        <span className="text-sm leading-tight font-semibold tracking-tight">
+          That Was Out of Bounds
+        </span>
         <ThemeToggle />
       </div>
       <nav className="flex flex-1 flex-col gap-1 px-3">

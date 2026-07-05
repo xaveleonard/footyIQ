@@ -1,4 +1,7 @@
+import { ListOrdered } from "lucide-react";
+
 import { TeamBarChart } from "@/components/charts/team-bar-chart";
+import { PageHeader } from "@/components/page-header";
 import { ParamSelect } from "@/components/param-select";
 import { ParamTabs } from "@/components/param-tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -39,10 +42,11 @@ export default async function LeaderboardsPage({ searchParams }: PageProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Category Leaderboards</h1>
-        <p className="text-sm text-muted-foreground">Season averages ranked by category.</p>
-      </div>
+      <PageHeader
+        icon={ListOrdered}
+        title="Category Leaderboards"
+        description="Season averages ranked by category."
+      />
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <ParamSelect

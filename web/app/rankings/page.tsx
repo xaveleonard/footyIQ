@@ -1,4 +1,7 @@
+import { Trophy } from "lucide-react";
+
 import { TeamBarChart } from "@/components/charts/team-bar-chart";
+import { PageHeader } from "@/components/page-header";
 import { ParamTabs } from "@/components/param-tabs";
 import { PowerScoreMethodology } from "@/components/power-score-methodology";
 import { Badge } from "@/components/ui/badge";
@@ -37,12 +40,11 @@ export default async function RankingsPage({ searchParams }: PageProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Power Rankings</h1>
-        <p className="text-sm text-muted-foreground">
-          Blended from category win rate, percentile strength, and consistency.
-        </p>
-      </div>
+      <PageHeader
+        icon={Trophy}
+        title="Power Rankings"
+        description="Blended from category win rate, percentile strength, and consistency."
+      />
 
       <PowerScoreMethodology />
 

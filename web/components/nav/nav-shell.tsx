@@ -11,7 +11,7 @@ export function NavShell({ children }: { children: ReactNode }) {
       <Sidebar />
       <div className="flex flex-1 flex-col">
         <header className="flex items-center justify-between border-b px-4 py-3 md:hidden">
-          <span className="text-lg font-semibold tracking-tight">footyIQ</span>
+          <span className="text-base font-semibold tracking-tight">That Was Out of Bounds</span>
           <ThemeToggle />
         </header>
         <main className="flex-1 px-4 py-6 pb-20 md:px-8 md:py-8 md:pb-8">
