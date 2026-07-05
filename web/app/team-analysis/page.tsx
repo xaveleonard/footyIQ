@@ -3,6 +3,7 @@ import { BarChart3 } from "lucide-react";
 import { StatusBarChart } from "@/components/charts/status-bar-chart";
 import { PageHeader } from "@/components/page-header";
 import { ParamSelect } from "@/components/param-select";
+import { ParamTabs } from "@/components/param-tabs";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -21,17 +22,24 @@ import {
   formatSignedPercent,
   formatVolatility,
 } from "@/lib/format";
+import type { RankingsWindow } from "@/lib/types";
+
+const WINDOW_OPTIONS = [
+  { value: "season", label: "Season" },
+  { value: "last3", label: "Last 3 Rounds" },
+];
 
 interface PageProps {
-  searchParams: Promise<{ team?: string }>;
+  searchParams: Promise<{ team?: string; window?: string }>;
 }
 
 export default async function TeamAnalysisPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const teams = await getTeams();
   const team = params.team && teams.includes(params.team) ? params.team : teams[0];
+  const window: RankingsWindow = params.window === "last3" ? "last3" : "season";
 
-  const detail = await getTeamDetail(team);
+  const detail = await getTeamDetail(team, window);
 
   const teamCount = teams.length;
   const chartData = detail.categories.map((stat) => ({
@@ -54,11 +62,14 @@ export default async function TeamAnalysisPage({ searchParams }: PageProps) {
         description="Deep dive on a single team's season."
       />
 
-      <ParamSelect
-        paramName="team"
-        value={team}
-        options={teams.map((t) => ({ value: t, label: t }))}
-      />
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <ParamSelect
+          paramName="team"
+          value={team}
+          options={teams.map((t) => ({ value: t, label: t }))}
+        />
+        <ParamTabs paramName="window" value={window} options={WINDOW_OPTIONS} />
+      </div>
 
       <div className="grid grid-cols-2 gap-4">
         <Card>
@@ -114,7 +125,9 @@ export default async function TeamAnalysisPage({ searchParams }: PageProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Category Percentile</CardTitle>
+          <CardTitle>
+            Category Percentile — {window === "last3" ? "Last 3 Rounds" : "Season"}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <StatusBarChart data={chartData} />
@@ -123,7 +136,9 @@ export default async function TeamAnalysisPage({ searchParams }: PageProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Category Breakdown</CardTitle>
+          <CardTitle>
+            Category Breakdown — {window === "last3" ? "Last 3 Rounds" : "Season"}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <Table>

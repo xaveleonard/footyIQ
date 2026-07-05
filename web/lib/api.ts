@@ -42,8 +42,11 @@ export function getTeams(): Promise<string[]> {
   return apiFetch<string[]>("/teams");
 }
 
-export function getTeamDetail(teamName: string): Promise<TeamDetail> {
-  return apiFetch<TeamDetail>(`/teams/${encodeURIComponent(teamName)}`);
+export function getTeamDetail(
+  teamName: string,
+  window: RankingsWindow = "season"
+): Promise<TeamDetail> {
+  return apiFetch<TeamDetail>(`/teams/${encodeURIComponent(teamName)}`, { window });
 }
 
 export function getPowerRankings(window: RankingsWindow = "season"): Promise<PowerRankingEntry[]> {

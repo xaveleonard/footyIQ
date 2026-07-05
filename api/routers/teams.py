@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 
-from api.dependencies import get_analytics_bundle
+from api.dependencies import Window, get_analytics_bundle
 from api.schemas.teams import TeamDetail
 from api.serializers import build_team_detail
 
@@ -13,8 +13,10 @@ def list_teams(bundle: dict = Depends(get_analytics_bundle)):
 
 
 @router.get("/{team_name}", response_model=TeamDetail)
-def get_team(team_name: str, bundle: dict = Depends(get_analytics_bundle)):
-    detail = build_team_detail(bundle, team_name)
+def get_team(
+    team_name: str, window: Window = "season", bundle: dict = Depends(get_analytics_bundle)
+):
+    detail = build_team_detail(bundle, team_name, window)
 
     if detail is None:
         raise HTTPException(status_code=404, detail=f"Unknown team: {team_name}")

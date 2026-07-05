@@ -1,8 +1,6 @@
-from typing import Literal
-
 from fastapi import APIRouter, Depends, HTTPException
 
-from api.dependencies import get_analytics_bundle
+from api.dependencies import Window, get_analytics_bundle
 from api.schemas.rankings import CategoryRecord, LeaderboardEntry, PowerRankingEntry
 from api.serializers import (
     build_all_leaderboards_response,
@@ -12,8 +10,6 @@ from api.serializers import (
 )
 
 router = APIRouter(prefix="/rankings", tags=["rankings"])
-
-Window = Literal["season", "last3"]
 
 
 @router.get("/power", response_model=list[PowerRankingEntry])

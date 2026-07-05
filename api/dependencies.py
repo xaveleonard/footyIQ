@@ -1,4 +1,5 @@
 from functools import lru_cache
+from typing import Literal
 
 from analysis.analytics_engine import AnalyticsEngine
 from analysis.rankings_engine import RankingsEngine
@@ -6,6 +7,8 @@ from analysis.matchup_engine import MatchupEngine
 from analysis.constants import RANKINGS_WINDOW_ROUNDS
 
 from api.config import get_settings
+
+Window = Literal["season", "last3"]
 
 
 def _build_window(rankings_engine, analytics):
@@ -36,22 +39,31 @@ def build_analytics_bundle(data_path: str) -> dict:
         season["averages"], recent["averages"]
     )
 
-    profiles = analytics_engine.identify_strengths_weaknesses(season["ranks"])
-
     last3_df = analytics_engine.filter_last_n_rounds(
         analytics_engine.df, RANKINGS_WINDOW_ROUNDS
     )
     last3_analytics = analytics_engine.build_analytics(last3_df)
 
+    # Every per-team view (Team Analysis, Power Rankings, Leaderboards) can be
+    # scoped to either the full season or just the last 3 rounds - this is the
+    # one dict everything else derives from per window.
+    analytics_by_window = {"season": season, "last3": last3_analytics}
+
+    profiles = {
+        window: analytics_engine.identify_strengths_weaknesses(analytics["ranks"])
+        for window, analytics in analytics_by_window.items()
+    }
+
     windows = {
-        "season": _build_window(rankings_engine, season),
-        "last3": _build_window(rankings_engine, last3_analytics),
+        window: _build_window(rankings_engine, analytics)
+        for window, analytics in analytics_by_window.items()
     }
 
     league_records = analytics_engine.compute_league_records(analytics_engine.df)
 
     return {
         "season": season,
+        "analytics_by_window": analytics_by_window,
         "recent_form_change": recent_form_change,
         "profiles": profiles,
         "windows": windows,

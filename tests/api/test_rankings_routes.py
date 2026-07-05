@@ -127,6 +127,27 @@ def test_power_rankings_window_last3_differs_from_season(windowed_client):
     assert last3_top["team_name"] == "Team F"
 
 
+def test_team_detail_window_last3_differs_from_season(windowed_client):
+    season = windowed_client.get("/teams/Team E", params={"window": "season"})
+    last3 = windowed_client.get("/teams/Team E", params={"window": "last3"})
+
+    assert season.status_code == 200
+    assert last3.status_code == 200
+
+    season_score = next(c for c in season.json()["categories"] if c["category"] == "score")
+    last3_score = next(c for c in last3.json()["categories"] if c["category"] == "score")
+
+    # Team E dominates the season overall (rank 1) but folds in its last 3
+    # rounds (score drops to 10 every round, last behind G/H's steady 50s)
+    assert season_score["rank"] == 1
+    assert last3_score["rank"] == 4
+    assert last3_score["average"] == pytest.approx(10.0)
+
+    assert season.json()["power_rank"] != last3.json()["power_rank"] or (
+        season.json()["power_score"] != last3.json()["power_score"]
+    )
+
+
 def test_window_rejects_invalid_value(client):
     response = client.get("/rankings/power", params={"window": "not_a_window"})
 

@@ -47,25 +47,28 @@ def df_records(df: pd.DataFrame) -> list[dict]:
 # ===========================================================
 
 
-def build_team_detail(bundle: dict, team_name: str) -> dict | None:
-    season = bundle["season"]
+def build_team_detail(bundle: dict, team_name: str, window: str = "season") -> dict | None:
+    analytics = bundle["analytics_by_window"][window]
 
-    if team_name not in season["averages"].index:
+    if team_name not in analytics["averages"].index:
         return None
 
-    power_rankings = bundle["windows"]["season"]["power_rankings"]
+    power_rankings = bundle["windows"][window]["power_rankings"]
     power_row = power_rankings[power_rankings["Team"] == team_name].iloc[0]
 
-    profile = bundle["profiles"][team_name]
+    profile = bundle["profiles"][window][team_name]
 
     categories = []
     for category in CATEGORY_COLS:
         categories.append(_clean_record({
             "category": category,
-            "average": season["averages"].loc[team_name, category],
-            "rank": season["ranks"].loc[team_name, category],
-            "win_rate": season["win_rates"].loc[team_name, category],
-            "volatility": season["volatility"].loc[team_name, category],
+            "average": analytics["averages"].loc[team_name, category],
+            "rank": analytics["ranks"].loc[team_name, category],
+            "win_rate": analytics["win_rates"].loc[team_name, category],
+            "volatility": analytics["volatility"].loc[team_name, category],
+            # form_change is always season-vs-recent-4-rounds, independent of
+            # the season/last3 window toggle - it's a separate "how is this
+            # team trending" signal, not the windowed stat itself.
             "form_change": bundle["recent_form_change"].loc[team_name, category],
         }))
 
