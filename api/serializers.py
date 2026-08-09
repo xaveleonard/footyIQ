@@ -153,8 +153,10 @@ def build_league_records_response(bundle: dict) -> list[dict]:
 def build_head_to_head_response(bundle: dict, team_a: str, team_b: str) -> dict:
     matchup_engine = bundle["matchup_engine"]
 
+    # Regular-season-only (see REGULAR_SEASON_END_ROUND) - finals rounds are
+    # excluded so they don't skew the averages/ranks behind the projection.
     result = matchup_engine.build_head_to_head(
-        team_a, team_b, bundle["season"], bundle["recent_form_change"]
+        team_a, team_b, bundle["matchup_season"], bundle["matchup_recent_form_change"]
     )
 
     categories = []
@@ -193,7 +195,10 @@ def build_head_to_head_response(bundle: dict, team_a: str, team_b: str) -> dict:
 def build_matchup_history_response(bundle: dict, team_a: str, team_b: str) -> dict:
     matchup_engine = bundle["matchup_engine"]
 
-    history = matchup_engine.build_round_matchup_history(team_a, team_b, bundle["raw_df"])
+    # Regular-season-only (see REGULAR_SEASON_END_ROUND) - finals rounds have
+    # uneven per-team participation, which would misalign the round-by-round
+    # pairing this function does by chronological index.
+    history = matchup_engine.build_round_matchup_history(team_a, team_b, bundle["matchup_raw_df"])
 
     rounds = []
     for _, row in history["head_to_head_table"].iterrows():

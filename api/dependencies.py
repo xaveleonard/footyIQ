@@ -4,7 +4,7 @@ from typing import Literal
 from analysis.analytics_engine import AnalyticsEngine
 from analysis.rankings_engine import RankingsEngine
 from analysis.matchup_engine import MatchupEngine
-from analysis.constants import RANKINGS_WINDOW_ROUNDS
+from analysis.constants import RANKINGS_WINDOW_ROUNDS, RECENT_FORM_ROUNDS, REGULAR_SEASON_END_ROUND
 
 from api.config import get_settings
 
@@ -39,6 +39,22 @@ def build_analytics_bundle(data_path: str) -> dict:
         season["averages"], recent["averages"]
     )
 
+    # The Matchups tab is capped to the regular season (see
+    # REGULAR_SEASON_END_ROUND) - finals rounds are still scraped into the
+    # parquet files for other purposes, but excluded here so the projected
+    # comparison and round-by-round simulation aren't skewed/broken by
+    # finals' uneven per-team participation.
+    matchup_raw_df = analytics_engine.df[
+        analytics_engine.df["round"] <= REGULAR_SEASON_END_ROUND
+    ]
+    matchup_season = analytics_engine.build_analytics(matchup_raw_df)
+    matchup_recent = analytics_engine.build_analytics(
+        analytics_engine.filter_last_n_rounds(matchup_raw_df, RECENT_FORM_ROUNDS)
+    )
+    matchup_recent_form_change = analytics_engine.compute_recent_form_change(
+        matchup_season["averages"], matchup_recent["averages"]
+    )
+
     last3_df = analytics_engine.filter_last_n_rounds(
         analytics_engine.df, RANKINGS_WINDOW_ROUNDS
     )
@@ -70,6 +86,9 @@ def build_analytics_bundle(data_path: str) -> dict:
         "league_records": league_records,
         "matchup_engine": matchup_engine,
         "raw_df": analytics_engine.df,
+        "matchup_season": matchup_season,
+        "matchup_recent_form_change": matchup_recent_form_change,
+        "matchup_raw_df": matchup_raw_df,
     }
 
 

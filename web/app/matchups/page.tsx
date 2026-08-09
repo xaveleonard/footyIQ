@@ -104,7 +104,7 @@ export default async function MatchupsPage({ searchParams }: PageProps) {
       <PageHeader
         icon={Swords}
         title="Head-to-Head Matchup"
-        description="Projected category comparison and simulated round history."
+        description="Projected category comparison and simulated round history, based on the regular season."
       />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

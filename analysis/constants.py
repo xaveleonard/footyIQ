@@ -22,6 +22,13 @@ RECENT_FORM_ROUNDS = 4
 # window size for the "Last 3 Rounds" toggle on Power Rankings / Leaderboards
 RANKINGS_WINDOW_ROUNDS = 3
 
+# last round of the regular season - the Matchups tab is capped to this,
+# since finals rounds have uneven participation (not every team plays every
+# round), which breaks both the round-by-round pairing in
+# MatchupEngine.build_round_matchup_history and would skew the averages/ranks
+# feeding the projected head-to-head comparison. Bump this next season.
+REGULAR_SEASON_END_ROUND = 20
+
 # ===========================================================
 # CATEGORY WEIGHTS
 # ===========================================================

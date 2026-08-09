@@ -11,7 +11,7 @@ def _validate_teams(bundle: dict, team_a: str, team_b: str) -> None:
     if team_a == team_b:
         raise HTTPException(status_code=400, detail="team_a and team_b must be different teams")
 
-    valid_teams = set(bundle["season"]["averages"].index)
+    valid_teams = set(bundle["matchup_season"]["averages"].index)
 
     for team in (team_a, team_b):
         if team not in valid_teams:
