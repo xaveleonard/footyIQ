@@ -55,8 +55,13 @@ def build_analytics_bundle(data_path: str) -> dict:
         matchup_season["averages"], matchup_recent["averages"]
     )
 
+    # "Last 3 Rounds" is capped to the regular season too (see
+    # REGULAR_SEASON_END_ROUND). Finals rounds have uneven per-team
+    # participation, so once the window slides into them a team with a
+    # single game in the window gets NaN volatility (std of one value),
+    # which cascades to a NaN Power Score and crashes the int rank cast.
     last3_df = analytics_engine.filter_last_n_rounds(
-        analytics_engine.df, RANKINGS_WINDOW_ROUNDS
+        matchup_raw_df, RANKINGS_WINDOW_ROUNDS
     )
     last3_analytics = analytics_engine.build_analytics(last3_df)
 
