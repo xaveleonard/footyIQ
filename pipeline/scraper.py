@@ -28,6 +28,16 @@ DATA_DIR = Path("data/raw/2026")
 MAX_ROUNDS = 25
 MATCHUPS_PER_ROUND = 8
 
+# finals rounds narrow the bracket, so fewer matchups than the regular
+# season's 8 - without this, the scraper would probe a nonexistent matchup
+# (e.g. m=7 in a 6-matchup round), read the preview page as "round not
+# started", and discard the matchups it already scraped for that round.
+FINALS_MATCHUP_COUNTS = {22: 6, 23: 6, 24: 4}
+
+
+def matchups_for_round(round_number):
+    return FINALS_MATCHUP_COUNTS.get(round_number, MATCHUPS_PER_ROUND)
+
 logging.basicConfig(level=logging.INFO)
 
 
@@ -364,7 +374,7 @@ def run(rounds=None):
             round_players = []
             round_unplayed = False
 
-            for m in range(1, MATCHUPS_PER_ROUND + 1):
+            for m in range(1, matchups_for_round(rnd) + 1):
 
                 try:
                     team_df, player_df = scrape_matchup(driver, rnd, m)
